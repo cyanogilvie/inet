@@ -1,0 +1,20 @@
+if {"bench" ni [info commands bench]} {
+	package require bench
+	namespace import bench::*
+}
+
+proc main {} {
+	bench valid_ipv4-1.1 {Validate IPv4} -batch auto -setup { #<<<
+        set val     127.0.0.1
+	} -compare {
+		inet	{ expr {[inet type $val] eq "ipv4"} }
+		regexp	{ regexp {^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$} $val }
+	} -cleanup {
+		unset -nocomplain val
+	} -result 1
+	#>>>
+}
+
+main
+
+# vim: ft=tcl foldmethod=marker foldmarker=<<<,>>> ts=4 shiftwidth=4

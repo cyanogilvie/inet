@@ -1,0 +1,61 @@
+if {"::tcltest" ni [namespace children]} {
+	package require tcltest
+	namespace import ::tcltest::*
+}
+
+loadTestedCommands
+package require inet
+
+test type-1.1 {type: valid ipv4 address} -body { #<<<
+	inet type 127.0.0.1
+} -result ipv4
+#>>>
+test type-2.1 {type: invalid ipv4 address: octet leading 0} -body { #<<<
+	inet type 127.0.0.01
+} -result invalid
+#>>>
+test type-2.2 {type: invalid ipv4 address: octet out of range} -body { #<<<
+	inet type 127.0.0.256
+} -result invalid
+#>>>
+test type-2.3 {type: invalid ipv4 address: too many digits} -body { #<<<
+	inet type 127.0.0.2550
+} -result invalid
+#>>>
+test type-2.4 {type: invalid ipv4 address: too many octets} -body { #<<<
+	inet type 127.0.0.255.1
+} -result invalid
+#>>>
+test type-2.5 {type: invalid ipv4 address: too few octets} -body { #<<<
+	inet type 127.0.0
+} -result invalid
+#>>>
+test type-2.6 {type: invalid ipv4 address: trailing garbage} -body { #<<<
+	inet type 127.0.0.1x
+} -result invalid
+#>>>
+test type-3.1 {type: valid ipv6 address} -body { #<<<
+	inet type ::1
+} -result ipv6
+#>>>
+test type-3.2 {type: valid ipv6 address} -body { #<<<
+	inet type 2001:db8::2/32
+} -result ipv6_net
+#>>>
+test type-3.3 {type: valid ipv6 address} -body { #<<<
+	inet type 2001:db8::/32
+} -result ipv6_net
+#>>>
+test type-4.1 {type: invalid ipv6 address: too many ::} -body { #<<<
+	inet type 2001:db8::1::2/32
+} -result invalid
+#>>>
+test type-5.1 {type: valid ipv4 in ipv6 address} -body { #<<<
+	inet type ::ffff:127.0.0.1
+} -result ipv6
+#>>>
+
+cleanupTests
+return
+
+# vim: ft=tcl foldmethod=marker foldmarker=<<<,>>> ts=4 shiftwidth=4
