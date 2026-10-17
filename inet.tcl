@@ -1,11 +1,11 @@
-package require jitc
+package require jitc 0.8
 
 namespace eval ::inet {
 	namespace export *
 	namespace ensemble create -prefixes no
 
 	set cdef {
-		options		{-Wall -gdwarf-5}
+		options		{-Wall -gdwarf-5 -O2}
 		filter		{jitc::re2c -W --case-ranges}
 		code {
 			Tcl_Obj*	lit_ipv4				= NULL;
@@ -32,8 +32,11 @@ namespace eval ::inet {
 			}
 
 			OBJCMD(type){
-				CHECK_ARGS(1, "addr");
-				const char*	str = Tcl_GetString(objv[1]);
+				int			code = TCL_OK;
+				enum {A_cmd, A_ADDR, A_objc};
+				CHECK_ARGS_LABEL(finally, code, "addr");
+
+				const char*	str = Tcl_GetString(objv[A_ADDR]);
 				const char*	YYCURSOR = str;
 				const char*	YYMARKER;
 
@@ -81,7 +84,10 @@ namespace eval ::inet {
 				*/
 
 				Tcl_SetObjResult(interp, Tcl_NewStringObj("Fell out of re2c block", -1));
-				return TCL_ERROR;
+				code = TCL_ERROR;
+
+			finally:
+				return code;
 			}
 		}
 	}
